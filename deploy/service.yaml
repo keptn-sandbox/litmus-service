@@ -1,23 +1,23 @@
 ---
-# Deployment of our keptn-service-template-go
+# Deployment of our litmus-service
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: keptn-service-template-go
+  name: litmus-service
   namespace: keptn
 spec:
   selector:
     matchLabels:
-      run: keptn-service-template-go
+      run: litmus-service
   replicas: 1
   template:
     metadata:
       labels:
-        run: keptn-service-template-go
+        run: litmus-service
     spec:
       containers:
-        - name: keptn-service-template-go
-          image: keptnsandbox/keptn-service-template-go:latest # Todo: Replace this with your image name
+        - name: litmus-service
+          image: keptnsandbox/litmus-service:latest 
           ports:
             - containerPort: 8080
           env:
@@ -25,27 +25,52 @@ spec:
               value: 'http://event-broker.keptn.svc.cluster.local/keptn'
             - name: CONFIGURATION_SERVICE
               value: 'http://configuration-service.keptn.svc.cluster.local:8080'
+        - name: distributor
+          image: keptn/distributor:0.7.1
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 10999
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          env:
+            - name: PUBSUB_URL
+              value: 'nats://keptn-nats-cluster'
+            - name: PUBSUB_TOPIC
+              value: 'sh.keptn.events.deployment-finished'
+            - name: PUBSUB_RECIPIENT
+              value: '127.0.0.1'
 ---
-# Expose keptn-service-template-go via Port 8080 within the cluster
+# Expose litmus-service via Port 8080 within the cluster
 apiVersion: v1
 kind: Service
 metadata:
-  name: keptn-service-template-go
+  name: litmus-service
   namespace: keptn
   labels:
-    run: keptn-service-template-go
+    run: litmus-service
 spec:
   ports:
     - port: 8080
       protocol: TCP
   selector:
-    run: keptn-service-template-go
+    run: litmus-service
 ---
 ## Subscribe to events via a keptn/distributor
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: keptn-service-template-go-distributor
+  name: litmus-service-distributor
   namespace: keptn
 spec:
   selector:
@@ -76,4 +101,4 @@ spec:
             - name: PUBSUB_TOPIC
               value: 'sh.keptn.>'
             - name: PUBSUB_RECIPIENT
-              value: 'keptn-service-template-go'
+              value: 'litmus-service'

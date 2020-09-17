@@ -44,8 +44,12 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	// run tests
 	// ToDo: Implement your tests here
 
+	log.Printf("looking for Litmus chaos experiment in Keptn git repo...")
+
+	log.Printf("executing Litmus chaos experiment...")
+
 	// Send Test Finished Event
-	// return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, "pass", nil, "keptn-service-template-go")
+	// return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, "pass", nil, "litmus-service")
 	return nil
 }
 

@@ -1,4 +1,4 @@
-module example.com/keptn-service-template-go
+module example.com/litmus-service
 
 go 1.13
 
