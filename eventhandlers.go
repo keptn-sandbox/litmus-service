@@ -1,9 +1,14 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"os/exec"
+	"strings"
 
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
+	keptnapi "github.com/keptn/go-utils/pkg/api/utils"
 	keptn "github.com/keptn/go-utils/pkg/lib"
 )
 
@@ -46,7 +51,29 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 
 	log.Printf("looking for Litmus chaos experiment in Keptn git repo...")
 
+	resourceHandler := keptnapi.NewResourceHandler("configuration-service:8080")
+
+	keptnResourceContent, err := resourceHandler.GetServiceResource(data.Project, data.Stage, data.Service, LitmusExperimentFileName)
+	var fileContent []byte
+	if err != nil {
+		logMessage := fmt.Sprintf("No %s file found for service %s in stage %s in project %s", LitmusExperimentFileName, data.Service, data.Stage, data.Project)
+		log.Printf(logMessage)
+		return errors.New(logMessage)
+	}
+	fileContent = []byte(keptnResourceContent.ResourceContent)
+	log.Println(string(fileContent))
+	// var myYaml Type
+	// yaml.Unmarshal(fileContent, &myYaml)
+
+	// save file locally
+
 	log.Printf("executing Litmus chaos experiment...")
+
+	output, err := ExecuteCommand("kubectl", []string{"apply", "-f", LitmusExperimentFileName})
+	if err != nil {
+
+	}
+	log.Printf("Execute command finished with: ", output)
 
 	// Send Test Finished Event
 	// return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, "pass", nil, "litmus-service")
@@ -112,4 +139,14 @@ func HandleActionTriggeredEvent(myKeptn *keptn.Keptn, incomingEvent cloudevents.
 		//myKeptn.SendActionFinishedEvent() TODO: implement the SendActionFinishedEvent in keptn/go-utils/pkg/lib/events.go
 	}
 	return nil
+}
+
+// ExecuteCommand exectues the command using the args
+func ExecuteCommand(command string, args []string) (string, error) {
+	cmd := exec.Command(command, args...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return string(out), fmt.Errorf("Error executing command %s %s: %s\n%s", command, strings.Join(args, " "), err.Error(), string(out))
+	}
+	return string(out), nil
 }

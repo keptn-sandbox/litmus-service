@@ -17,6 +17,9 @@ import (
 
 var keptnOptions = keptn.KeptnOpts{}
 
+// LitmusExperimentFileName is file name of experiemnt to trigger
+const LitmusExperimentFileName = "litmus/experiment.yaml"
+
 type envConfig struct {
 	// Port on which to listen for cloudevents
 	Port int `envconfig:"RCV_PORT" default:"8080"`
