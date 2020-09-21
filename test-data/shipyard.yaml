@@ -1,0 +1,4 @@
+stages:
+  - name: "chaos"
+    deployment_strategy: "direct"
+    test_strategy: "performance"
