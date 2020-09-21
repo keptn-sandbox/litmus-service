@@ -5,7 +5,7 @@ services:
   - docker
 env:
   global:
-    - IMAGE=keptnsandbox/litmus-service # PLEASE CHANGE THE IMAGE NAME!!!
+    - IMAGE=keptnsandbox/litmus-service 
     - GO111MODULE=on
     - GOPROXY=https://proxy.golang.org
 before_install:
