@@ -17,7 +17,7 @@ kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-serv
 
 keptn configure monitoring prometheus --project=litmus --service=carts
 
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/0.2.2/deploy/service.yaml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/release-0.2.2/deploy/service.yaml
 
 keptn add-resource --project=litmus --stage=chaos --service=carts --resource=prometheus/sli.yaml --resourceUri=prometheus/sli.yaml 
 
