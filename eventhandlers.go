@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -61,17 +63,17 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 		return errors.New(logMessage)
 	}
 	fileContent = []byte(keptnResourceContent.ResourceContent)
-	log.Println(string(fileContent))
-	// var myYaml Type
-	// yaml.Unmarshal(fileContent, &myYaml)
 
-	// save file locally
+	_ = os.Mkdir("litmus", 0644)
+	err = ioutil.WriteFile(LitmusExperimentFileName, fileContent, 0644)
+	if err != nil {
+		log.Printf("could not store experiment file locally: %s", err.Error())
+	}
 
 	log.Printf("executing Litmus chaos experiment...")
-
 	output, err := ExecuteCommand("kubectl", []string{"apply", "-f", LitmusExperimentFileName})
 	if err != nil {
-
+		log.Printf("Error execute kubectl apply command: %s", err.Error())
 	}
 	log.Printf("Execute command finished with: ", output)
 
@@ -86,6 +88,8 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 //
 func HandleTestsFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudevents.Event, data *keptn.TestsFinishedEventData) error {
 	log.Printf("Handling Tests Finished Event: %s", incomingEvent.Context.GetID())
+
+	// delete chaos experiment
 
 	return nil
 }
