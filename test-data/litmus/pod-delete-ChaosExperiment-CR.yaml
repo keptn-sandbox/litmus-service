@@ -1,0 +1,71 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: pod-delete
+  namespace: litmus-chaos
+spec:
+  definition:
+    scope: Namespaced
+    permissions:
+      - apiGroups:
+          - ""
+          - "apps"
+          - "batch"
+          - "litmuschaos.io"
+        resources:
+          - "deployments"
+          - "jobs"
+          - "pods"
+          - "pods/log"
+          - "events"
+          - "configmaps"
+          - "chaosengines"
+          - "chaosexperiments"
+          - "chaosresults"
+        verbs:
+          - "create"
+          - "list"
+          - "get"
+          - "patch"
+          - "update"
+          - "delete"
+      - apiGroups:
+          - ""
+        resources: 
+          - "nodes"
+        verbs:
+          - "get"
+          - "list"
+    image: "litmuschaos/go-runner:1.8.1"
+    imagePullPolicy: Always
+    args:
+    - -c
+    - ./experiments/pod-delete
+    command:
+    - /bin/bash
+    env:
+
+    - name: TOTAL_CHAOS_DURATION
+      value: '15'
+
+    # Period to wait before and after injection of chaos in sec
+    - name: RAMP_TIME
+      value: ''
+
+    - name: FORCE
+      value: 'true'
+
+    - name: CHAOS_INTERVAL
+      value: '5'
+
+    ## percentage of total pods to target
+    - name: PODS_AFFECTED_PERC
+      value: ''
+
+    - name: LIB
+      value: 'litmus'    
+
+    - name: TARGET_POD
+      value: ''
+    labels:
+      name: pod-delete
