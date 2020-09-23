@@ -25,6 +25,22 @@ keptn add-resource --project=litmus --stage=chaos --service=carts --resource=slo
 
 keptn configure monitoring prometheus --project=litmus --service=carts
 
+# Litmus PreReq Begins!! 
+
+## install litmus operator & chaos CRDs 
+
+kubectl apply -f litmus/litmus-operator-v1.8.1.yaml
+
+## pull the chaos experiment CR (static) 
+
+kubectl apply -f litmus/pod-delete-ChaosExperiment-CR.yaml 
+
+## pull the chaos experiment RBAC (static) 
+
+kubectl apply -f litmus/pod-delete-rbac.yaml 
+
+# Litmus PreReq End!! 
+
 ## now we also have to add the chaos tests - ATTENTION right now this file is empty!
 keptn add-resource --project=litmus --stage=chaos --service=carts --resource=litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
