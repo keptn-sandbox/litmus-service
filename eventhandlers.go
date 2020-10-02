@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	keptnapi "github.com/keptn/go-utils/pkg/api/utils"
@@ -46,7 +47,7 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	log.Printf("Handling Deployment Finished Event: %s", incomingEvent.Context.GetID())
 
 	// capture start time for tests
-	// startTime := time.Now()
+	startTime := time.Now()
 
 	// run tests
 	// ToDo: Implement your tests here
@@ -75,11 +76,29 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	if err != nil {
 		log.Printf("Error execute kubectl apply command: %s", err.Error())
 	}
-	log.Printf("Execute command finished with: ", output)
+	log.Printf("Execute command finished with: %s", output)
 
+	// Allow the chaos-operator to patch the engine with the initial status
+	time.Sleep(2 * time.Second)
+
+	var chaosStatus string
+	for chaosStatus != "completed" {
+		log.Printf("Waiting for completion of chaos experiment..")
+		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", "carts-chaos", "-o", "jsonpath='{.status.engineStatus}'", "-n", "litmus-chaos"})
+		if err != nil {
+			log.Printf("Error while retrieving chaos status: %s", err.Error())
+			break
+		}
+		chaosStatus = strings.Trim(chaosStatus, `'"`)
+		log.Println("status: " + chaosStatus)
+		// interval before we check the chaosengine status again
+		time.Sleep(2 * time.Second)
+	}
+
+	log.Printf("Chaos experiment is completed")
 	// Send Test Finished Event
-	// return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, "pass", nil, "litmus-service")
-	return nil
+	return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, "pass", nil, "litmus-service")
+	//return nil
 }
 
 //
@@ -90,6 +109,11 @@ func HandleTestsFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudevents.Ev
 	log.Printf("Handling Tests Finished Event: %s", incomingEvent.Context.GetID())
 
 	// delete chaos experiment
+	log.Printf("Deleting chaos experiment resources")
+	_, err := ExecuteCommand("kubectl", []string{"delete", "-f", LitmusExperimentFileName})
+	if err != nil {
+		log.Printf("Error execute kubectl delete command: %s", err.Error())
+	}
 
 	return nil
 }
