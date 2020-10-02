@@ -78,17 +78,19 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	}
 	log.Printf("Execute command finished with: %s", output)
 
-	// Allow the chaos-operator to patch the engine with the initial status 
+	// Allow the chaos-operator to patch the engine with the initial status
 	time.Sleep(2 * time.Second)
 
 	var chaosStatus string
 	for chaosStatus != "completed" {
 		log.Printf("Waiting for completion of chaos experiment..")
-		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", "carts-chaos", "-o", "custom-columns=:status.engineStatus", "-n", "litmus-chaos", "--no-headers"})
+		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", "carts-chaos", "-o", "jsonpath='{.status.engineStatus}'", "-n", "litmus-chaos"})
 		if err != nil {
-                	log.Printf("Error while retrieving chaos status: %s", err.Error())
-			break 
-        	}
+			log.Printf("Error while retrieving chaos status: %s", err.Error())
+			break
+		}
+		chaosStatus = strings.Trim(chaosStatus, `'"`)
+		log.Println("status: " + chaosStatus)
 		// interval before we check the chaosengine status again
 		time.Sleep(2 * time.Second)
 	}
@@ -110,8 +112,8 @@ func HandleTestsFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudevents.Ev
 	log.Printf("Deleting chaos experiment resources")
 	_, err := ExecuteCommand("kubectl", []string{"delete", "-f", LitmusExperimentFileName})
 	if err != nil {
-                log.Printf("Error execute kubectl delete command: %s", err.Error())
-        }
+		log.Printf("Error execute kubectl delete command: %s", err.Error())
+	}
 
 	return nil
 }
