@@ -96,8 +96,23 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	}
 
 	log.Printf("Chaos experiment is completed")
+
+	// Getting ChaosResult Data
+	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", "carts-chaos-pod-delete", "-o", "jsonpath='{.status.experimentstatus.verdict}'", "-n", "litmus-chaos"})
+	if err != nil {
+		log.Printf("Error while retrieving chaos result: %s", err.Error())
+	}
+	verdict = strings.Trim(verdict, `'"`)
+	log.Println("ChaosExperiment Verdict: " + verdict)
+	if verdict == "Pass" {
+		verdict = "pass"
+	} else {
+		verdict = "fail"
+	}
+	log.Println("Final Result: " + verdict)
+
 	// Send Test Finished Event
-	return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, "pass", nil, "litmus-service")
+	return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, verdict, nil, "litmus-service")
 	//return nil
 }
 

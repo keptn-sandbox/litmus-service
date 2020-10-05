@@ -141,17 +141,6 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
-github.com/keptn/go-utils v0.6.1-0.20200401063654-dcd515a62214 h1:roAcbxvyRNL+kCaigKO3iNkNmcq75XVZ5DxU7w+aYEA=
-github.com/keptn/go-utils v0.6.1-0.20200401063654-dcd515a62214/go.mod h1:aDNFm3olvCZd7AE6/Xyir4g5Mw6E89mjhKt0zoJHC6g=
-github.com/keptn/go-utils v0.6.1-0.20200402095926-a4ac0d7044a0 h1:Y1lVfmAeifhfWMV/OWCXlFYAtGUkHmaQ0FT10wLwaUw=
-github.com/keptn/go-utils v0.6.1-0.20200402095926-a4ac0d7044a0/go.mod h1:aDNFm3olvCZd7AE6/Xyir4g5Mw6E89mjhKt0zoJHC6g=
-github.com/keptn/go-utils v0.6.1-compat h1:Uqd0fmbPRxIqXpRv4q/q/O+KjAnJa+moZ85H19QN7oE=
-github.com/keptn/go-utils v0.6.1-compat/go.mod h1:aDNFm3olvCZd7AE6/Xyir4g5Mw6E89mjhKt0zoJHC6g=
-github.com/keptn/go-utils v0.6.1 h1:ukBe1qtBiUyltabVMhTsx09pwlQTTRn3hJJc/XD81EY=
-github.com/keptn/go-utils v0.6.2 h1:QpnshZ6cv64T+RZaLaqw6WEnKwV/A1YN3AVLrckva6k=
-github.com/keptn/go-utils v0.6.2/go.mod h1:aDNFm3olvCZd7AE6/Xyir4g5Mw6E89mjhKt0zoJHC6g=
-github.com/keptn/go-utils v0.6.3-0.20200615074910-2565441cb79d h1:VtFkwEEXBCKnp67X4Dy4y6ZVu+r2X9juDDexgtZl0Sc=
-github.com/keptn/go-utils v0.6.3-0.20200615074910-2565441cb79d/go.mod h1:hf2FU6JFuOzLP5rEAlA1/XnNS28pDZbVfxDESeQsq1g=
 github.com/keptn/go-utils v0.7.1 h1:qDViu8qhijdh7QK1+k+i4hEDtTwkHo2PxsomxKvxlpg=
 github.com/keptn/go-utils v0.7.1/go.mod h1:hf2FU6JFuOzLP5rEAlA1/XnNS28pDZbVfxDESeQsq1g=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
