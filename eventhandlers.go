@@ -90,7 +90,6 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 			break
 		}
 		chaosStatus = strings.Trim(chaosStatus, `'"`)
-		log.Println("status: " + chaosStatus)
 		// interval before we check the chaosengine status again
 		time.Sleep(2 * time.Second)
 	}
