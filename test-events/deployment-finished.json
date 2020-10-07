@@ -15,7 +15,7 @@
     "image": "docker.io/keptnexamples/carts",
     "labels": {
       "testid": "12345",
-      "buildnr": "build17",
+      "buildId": "build17",
       "runby": "JohnDoe"
     },
     "deploymentURILocal": "http://carts.litmus-chaos.svc.cluster.local",
