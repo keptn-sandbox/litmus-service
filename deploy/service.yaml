@@ -65,6 +65,8 @@ spec:
               value: 'http://event-broker.keptn.svc.cluster.local/keptn'
             - name: CONFIGURATION_SERVICE
               value: 'http://configuration-service.keptn.svc.cluster.local:8080'
+            - name: SEND_TEST_FINISHED_EVENT
+              value: false
         - name: distributor
           image: keptn/distributor:0.7.1
           livenessProbe:
