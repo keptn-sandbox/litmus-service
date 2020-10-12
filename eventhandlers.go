@@ -15,6 +15,9 @@ import (
 	keptn "github.com/keptn/go-utils/pkg/lib"
 )
 
+// SendTestsFinishedEvent defines whether to send a test finished event after executing chaos tests
+var SendTestsFinishedEvent = os.Getenv("SEND_TEST_FINISHED_EVENT")
+
 /**
 * Here are all the handler functions for the individual event
   See https://github.com/keptn/spec/blob/0.1.3/cloudevents.md for details on the payload
@@ -50,8 +53,6 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	startTime := time.Now()
 
 	// run tests
-	// ToDo: Implement your tests here
-
 	log.Printf("looking for Litmus chaos experiment in Keptn git repo...")
 
 	resourceHandler := keptnapi.NewResourceHandler("configuration-service:8080")
@@ -111,16 +112,19 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	log.Println("Final Result: " + verdict)
 
 	// Send Test Finished Event
-	return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, verdict, nil, "litmus-service")
-	//return nil
+	if SendTestsFinishedEvent == "true" {
+		return myKeptn.SendTestsFinishedEvent(&incomingEvent, "", "", startTime, verdict, nil, "litmus-service")
+	}
+	return nil
 }
 
 //
 // Handles TestsFinishedEventType = "sh.keptn.events.tests-finished"
-// TODO: add in your handler code
 //
 func HandleTestsFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudevents.Event, data *keptn.TestsFinishedEventData) error {
 	log.Printf("Handling Tests Finished Event: %s", incomingEvent.Context.GetID())
+
+	// potential improvement: check if the Test-finished event is coming from Litmus service and ignore if so
 
 	// delete chaos experiment
 	log.Printf("Deleting chaos experiment resources")
