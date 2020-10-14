@@ -1,27 +1,9 @@
-# README
-
-This is a Keptn Service Template written in GoLang. 
-
-Quick start:
-
-1. Click [Use this template](https://github.com/keptn-sandbox/litmus-service/generate) on top of the repository, or download the repo as a zip-file, extract it into a new folder named after the service you want to create (e.g., simple-service) 
-1. Replace every occurrence of (docker) image names and tags from `keptnsandbox/litmus-service` to your docker organization and image name (e.g., `yourorganization/simple-service`)
-1. Replace every occurrence of `litmus-service` with the name of your service (e.g., `simple-service`)
-1. Optional (but recommended): Create a git repo (e.g., on `github.com/your-username/simple-service`)
-1. Àdapt the [go.mod](go.mod) file and change `example.com/` to the actual package name (e.g., `github.com/your-username/simple-service`)
-1. Add yourself to the [CODEOWNERS](CODEOWNERS) file
-1. Initialize a git repository: 
-  * `git init .`
-  * `git add .`
-  * `git commit -m "Initial Commit"`
-1. Optional: Push your code an upstream git repo (e.g., GitHub) and adapt all links that contain `github.com` (e.g., to `github.com/your-username/simple-service`)
-1. Last but not least: Remove this intro within the README file and make sure the README file properly states what this repository is about
-
-# litmus-service
+# litmus-service	
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/keptn-sandbox/litmus-service)
 [![Go Report Card](https://goreportcard.com/badge/github.com/keptn-sandbox/litmus-service)](https://goreportcard.com/report/github.com/keptn-sandbox/litmus-service)
 
-This implements a litmus-service for Keptn. If you want to learn more about Keptn visit us on [keptn.sh](https://keptn.sh)
+This service provides a way to perform chaos tests on your applications within the [Keptn](https://keptn.sh) pipeline using 
+the [LitmusChaos](https://litmuschaos.io) framework. 
 
 ## Compatibility Matrix
 
@@ -29,9 +11,33 @@ This implements a litmus-service for Keptn. If you want to learn more about Kept
 |:----------------:|:----------------------------------------:|
 |       0.7.1      | keptnsandbox/litmus-service:0.1.0 |
 
-## Installation
+### PreRequisites
 
-The *litmus-service* can be installed as a part of [Keptn's uniform](https://keptn.sh).
+The Keptn *litmus-service* requires the following prerequisites to be setup on the Kubernetes cluster for it to run the chaos tests:  
+
+- LitmusChaos custom resource definitions (CRDs)
+- The Chaos Operator 
+- The `ChaosExperiment` custom resources (CRs)
+- The RBAC (`serviceaccount`, `role`, `rolebinding`) associated with the chaos test 
+
+Execute the following commands to setup these dependencies: 
+
+```console
+kubectl apply -f ./test-data/litmus/litmus-operator-v1.8.1.yaml
+kubectl apply -f ./test-data/litmus/pod-delete-ChaosExperiment-CR.yaml 
+kubectl apply -f ./test-data/litmus/pod-delete-rbac.yaml 
+```
+
+**Notes**: 
+
+- This repo provides the example (yaml specifications) of a [pod-delete](https://docs.litmuschaos.io/docs/pod-delete/) chaos test. 
+You can choose to specify other [experiments](https://hub.litmuschaos.io/) depending on your need, when building your own litmus service. 
+Ensure that the correct `ChaosEngine` spec is provided in the [experiment manifest](./test-data/litmus/experiment.yaml) along with the 
+corresponding `ChaosExperiment` CR & RBAC manifests. 
+
+- This repo uses the sample [*carts*](https://github.com/keptn-sandbox/litmus-service/tree/master/test-data/carts) app as the Application-Under-Test (AUT) 
+  to illustrate the impact of chaos. Hence, the [experiment](./test-data/litmus/experiment.yaml) is populated with the respective attributes for app 
+  filtering purposes. Ensure you have the right data placed in the `spec.appinfo` when adopting this for your environments.
 
 ### Deploy in your Kubernetes cluster
 
@@ -48,25 +54,57 @@ kubectl -n keptn get deployment litmus-service -o wide
 kubectl -n keptn get pods -l run=litmus-service
 ```
 
-### Up- or Downgrading
+### How does the service work
 
-Adapt and use the following command in case you want to up- or downgrade your installed version (specified by the `$VERSION` placeholder):
+The service implements [handlers](https://github.com/keptn-sandbox/litmus-service/blob/master/eventhandlers.go) for triggering the chaos tests 
+immediately after the review app is deployed successfully on the namespace created for the pipeline stage. The test is executed by a set of 
+*chaos pods* (notably, the *chaos-runner* & *experiment* pod) and the test results stored in a `ChaosResult` custom resource. The duration of the 
+test & other tunables can be configured in the `ChaosEngine` resource. Refer to the [Litmus docs](https://docs.litmuschaos.io/docs/chaosengine/) on 
+supported tunables. Litmus ensures that the review app/deployment is restored to it's initial state upon completion of the test.
 
-```console
-kubectl -n keptn set image deployment/litmus-service litmus-service=keptnsandbox/litmus-service:$VERSION --record
-```
+The Keptn litmus-service also [conditionally](https://github.com/keptn-sandbox/litmus-service/blob/master/deploy/service.yaml#L68) generates & handles 
+the `test.finished` event by cleaning up residual chaos resources (*running* or *completed*) in the cluster. 
 
-### Uninstall
+It is a standard practice to execute the chaos tests in parallel with other performance/load tests running on the AUT. The subsequent quality gate evaluations
+in such cases are more reflective of real world outcomes. 
 
-To delete a deployed *litmus-service*, use the file `deploy/*.yaml` files from this repository and delete the Kubernetes resources:
+**Note**: This repo, in its sample pipeline, uses a [jmeter](https://github.com/keptn-sandbox/litmus-service/tree/master/test-data/jmeter) load test 
+against the AUT, *carts*, running in parallel with the pod-delete chaos test.
+
+### Delete in your Kubernetes cluster
+
+To delete the litmus-service, delete using the [`deploy/service.yaml`](deploy/service.yaml) file:
 
 ```console
 kubectl delete -f deploy/service.yaml
 ```
 
+### Upgrade or Downgrading
+
+Adapt and use the following command in case you want to upgrade or downgrade your installed version (specified by the `$VERSION` placeholder):
+
+```console
+kubectl -n keptn set image deployment/litmus-service litmus-service=keptnsandbox/litmus-service:$VERSION --record
+```
+
+### Configuring the Service
+
+- The service implements simple handlers for the `deployment.finished` & `test.finished` events - i.e., triggers chaos by creating the `ChaosEngine` 
+  resource, fetching info from `ChaosResult` resource & eventually deleting them, respectively. In case you would need additional functions/capabilities,
+  update the [eventhandlers.go](https://github.com/keptn-sandbox/litmus-service/blob/master/eventhandlers.go). For more info around how to go about this, 
+  view the **Development** section.
+
+- Considering the litmus-service runs in the keptn namespace & acts on resources/applications on other namespaces (as per the project/stage names), 
+  it uses a cluster-wide RBAC. Tune the [permissions](https://github.com/keptn-sandbox/litmus-service/blob/master/deploy/service.yaml#L17) associated with this 
+  service based on functionality needed apart from CRUD on `ChaosEngine` & `ChaosResults`. 
+
+- In case you would like to cleanup chaos resources immediately after completion of the chaos test (either because you aren't running other tests of 
+  primary significance such as perf tests), set the environment variable `SEND_TEST_FINISHED_EVENT` to `true` in the litmus-service deployment
+
+
 ## Development
 
-Development can be conducted using any GoLang compatible IDE/editor (e.g., Jetbrains GoLand, VSCode with Go plugins).
+Development can be conducted using any Golang compatible IDE/editor (e.g., Jetbrains GoLand, VSCode with Go plugins).
 
 It is recommended to make use of branches as follows:
 
