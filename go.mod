@@ -1,4 +1,4 @@
-module example.com/litmus-service
+module github.com/keptn-sandbox/litmus-service
 
 go 1.13
 
