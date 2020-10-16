@@ -16,7 +16,7 @@ the [LitmusChaos](https://litmuschaos.io) framework.
 |       0.7.2      | TBD |
 
 
-## PreRequisites
+## Prerequisites
 
 The Keptn *litmus-service* requires the following prerequisites to be setup on the Kubernetes cluster for it to run the chaos tests:  
 
@@ -56,6 +56,19 @@ This will install the `litmus-service` into the `keptn` namespace, which you can
 kubectl -n keptn get deployment litmus-service -o wide
 kubectl -n keptn get pods -l run=litmus-service
 ```
+
+### Usage
+
+To make use of the Litmus service, a dedicated `experiment.yaml` file with the actual chaos experiment has to be added to Keptn (for the service under test).
+
+You can do this via the Keptn CLI, please replace the values for `project`, `stage`, `service` and `resource` with your actual values. But note that the `resourceUri` has to be set to `litmus/experiment.yaml`.
+
+```
+keptn add-resource --project=litmus --stage=chaos --service=carts --resource=litmus/experiment.yaml --resourceUri=litmus/experiment.yaml 
+```
+
+Please note that it is recommended to run the chaos experiment along with some load testing. 
+Now when a `send-test` event is sent to Keptn, the chaos test will be triggered along with the load tests. Once the load tests are finished, Keptn will do the evaluation and provide you with a result. With this you can then verify if your application is resilient in the way that your SLOs are still met.
 
 ## How does the service work?
 
