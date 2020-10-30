@@ -1,0 +1,21 @@
+{
+  "contenttype": "application/json",
+  "data": {
+    "canary": {
+      "action": "set",
+      "value": 100
+    },
+    "eventContext": null,
+    "labels": null,
+    "project": "litmus",
+    "service": "helloservice",
+    "stage": "",
+    "valuesCanary": {
+      "image": "jetzlstorfer/hello-server:v0.1.0",
+      "replicaCount": 1
+    }
+  },
+  "source": "https://github.com/keptn/keptn/cli#configuration-change",
+  "specversion": "0.2",
+  "type": "sh.keptn.event.configuration.change"
+}
