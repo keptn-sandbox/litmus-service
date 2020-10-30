@@ -1,0 +1,9 @@
+---
+spec_version: '0.1.0'
+workloads:
+  - teststrategy: performance
+    vuser: 1000
+    loopcount: 10000
+    thinktime: 2500
+    script: jmeter/load.jmx
+    acceptederrorrate: 1.0
