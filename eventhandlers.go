@@ -83,9 +83,10 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	time.Sleep(2 * time.Second)
 
 	var chaosStatus string
+	projectAndNamespace := data.Project + "-" + data.Stage
 	for chaosStatus != "completed" {
 		log.Printf("Waiting for completion of chaos experiment..")
-		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", "carts-chaos", "-o", "jsonpath='{.status.engineStatus}'", "-n", "litmus-chaos"})
+		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", data.Service + "-chaos", "-o", "jsonpath='{.status.engineStatus}'", "-n", projectAndNamespace})
 		if err != nil {
 			log.Printf("Error while retrieving chaos status: %s", err.Error())
 			break
@@ -98,7 +99,7 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	log.Printf("Chaos experiment is completed")
 
 	// Getting ChaosResult Data
-	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", "carts-chaos-pod-delete", "-o", "jsonpath='{.status.experimentstatus.verdict}'", "-n", "litmus-chaos"})
+	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", data.Service + "-chaos-pod-delete", "-o", "jsonpath='{.status.experimentstatus.verdict}'", "-n", projectAndNamespace})
 	if err != nil {
 		log.Printf("Error while retrieving chaos result: %s", err.Error())
 	}
