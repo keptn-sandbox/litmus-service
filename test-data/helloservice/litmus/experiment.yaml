@@ -1,0 +1,33 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: helloservice-chaos
+  namespace: litmus-chaos
+spec:
+  appinfo:
+    applabel: 'app=helloservice'
+    appkind: 'deployment'
+  annotationCheck: 'false'
+  engineState: 'active'
+  chaosServiceAccount: pod-delete-sa
+  monitoring: true
+  jobCleanUpPolicy: 'retain'
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            # set chaos duration (in sec) as desired
+            - name: TOTAL_CHAOS_DURATION
+              value: '10'
+
+            - name: RAMP_TIME
+              value: '10'
+
+            # set chaos interval (in sec) as desired
+            - name: CHAOS_INTERVAL
+              value: '15'
+              
+            # pod failures without '--force' & default terminationGracePeriodSeconds
+            - name: FORCE
+              value: 'false'
