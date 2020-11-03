@@ -82,6 +82,8 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	// Allow the chaos-operator to patch the engine with the initial status
 	time.Sleep(2 * time.Second)
 
+	// Here is where we extract the chaosUID
+
 	var chaosStatus string
 	projectAndNamespace := data.Project + "-" + data.Stage
 	for chaosStatus != "completed" {
