@@ -16,6 +16,10 @@ objectives:
       - criteria:
           - ">=90"
     weight: 1
+  - sli: "probe_duration_ms"
+    pass:
+      - criteria:
+          - "<=+25%"
 total_score:
   pass: "100%"
-  warning: "50%"
+  warning: "75%"
