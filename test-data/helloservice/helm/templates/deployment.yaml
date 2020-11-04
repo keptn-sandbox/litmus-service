@@ -22,3 +22,10 @@ spec:
         env:
         - name: PORT
           value: "9000"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 15
