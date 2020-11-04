@@ -8,6 +8,10 @@ keptn add-resource --project=litmus --stage=chaos --service=helloservice --resou
 keptn add-resource --project=litmus --stage=chaos --service=carts --resource=litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
 
+## Send deployment event
+keptn send event -f test-data/helloservice/deploy-event.json
+
+
 ### TODO
 # add SLI
 # add SLO
