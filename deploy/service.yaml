@@ -56,7 +56,7 @@ spec:
       serviceAccountName: keptn-litmus-service
       containers:
         - name: litmus-service
-          image: keptnsandbox/litmus-service:0.1.0
+          image: jetzlstorfer/litmus-service:dev
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -66,7 +66,7 @@ spec:
             - name: CONFIGURATION_SERVICE
               value: 'http://configuration-service.keptn.svc.cluster.local:8080'
             - name: SEND_TEST_FINISHED_EVENT
-              value: false
+              value: 'false'
         - name: distributor
           image: keptn/distributor:0.7.1
           livenessProbe:

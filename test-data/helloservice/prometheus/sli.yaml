@@ -1,0 +1,5 @@
+---
+spec_version: '1.0'
+indicators:
+  probe_duration_ms: avg_over_time(probe_duration_seconds{instance="$SERVICE.$PROJECT-$STAGE.svc.cluster.local:80",job="blackbox"}[$DURATION_SECONDS:1s])*1000
+  probe_success_percentage: avg_over_time(probe_success{instance="$SERVICE.$PROJECT-$STAGE.svc.cluster.local:80",job="blackbox"}[$DURATION_SECONDS:1s])*100
