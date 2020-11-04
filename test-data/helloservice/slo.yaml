@@ -19,7 +19,7 @@ objectives:
   - sli: "probe_duration_ms"
     pass:
       - criteria:
-          - "<=+25%"
+          - "<=100"
 total_score:
   pass: "100%"
   warning: "75%"
