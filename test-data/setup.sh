@@ -34,7 +34,7 @@ keptn configure monitoring prometheus --project=litmus --service=carts
 
 ## install litmus operator & chaos CRDs 
 
-kubectl apply -f litmus/litmus-operator-v1.8.1.yaml
+kubectl apply -f litmus/litmus-operator-v1.9.1.yaml
 
 ## pull the chaos experiment CR (static) 
 

@@ -53,7 +53,7 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	startTime := time.Now()
 
 	// run tests
-	log.Printf("looking for Litmus chaos experiment in Keptn git repo...")
+	log.Printf("Looking for Litmus chaos experiment in Keptn git repo...")
 
 	resourceHandler := keptnapi.NewResourceHandler("configuration-service:8080")
 
@@ -69,26 +69,42 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 	_ = os.Mkdir("litmus", 0644)
 	err = ioutil.WriteFile(LitmusExperimentFileName, fileContent, 0644)
 	if err != nil {
-		log.Printf("could not store experiment file locally: %s", err.Error())
+		log.Printf("Could not store experiment file locally: %s", err.Error())
 	}
 
-	log.Printf("executing Litmus chaos experiment...")
+	// construct the namespace of the chaos resources
+	projectAndNamespace := data.Project + "-" + data.Stage
+
+	//Obtain the ChaosEngine name from the Keptn experiment manifest 
+	chaosEngineName, err := ExecuteCommand("kubectl", []string{"apply", "-f", LitmusExperimentFileName, "--dry-run", "-o", "jsonpath='{.metadata.name}'"})
+	if err != nil {
+                log.Printf("Error while extracting chaosengine name from manifest: %s", err.Error())
+        }
+	chaosEngineName = strings.Trim(chaosEngineName, `'"`)
+	log.Printf("Name of ChaosEngine: %s", chaosEngineName)
+
+	log.Printf("Executing Litmus chaos experiment...")
 	output, err := ExecuteCommand("kubectl", []string{"apply", "-f", LitmusExperimentFileName})
 	if err != nil {
 		log.Printf("Error execute kubectl apply command: %s", err.Error())
 	}
-	log.Printf("Execute command finished with: %s", output)
+	log.Printf("ChaosEngine create command finished with: %s", output)
 
 	// Allow the chaos-operator to patch the engine with the initial status
 	time.Sleep(2 * time.Second)
 
-	// Here is where we extract the chaosUID
+	// Extract the chaosUID for use in result extraction
+	uid, err := ExecuteCommand("kubectl", []string{"get", "chaosengine", chaosEngineName, "-o", "jsonpath='{.metadata.uid}'", "-n", projectAndNamespace})
+	if err != nil {
+		log.Printf("Error while retrieving chaosengine UID: %s", err.Error())
+	}
+	chaosUID := strings.Trim(string(uid), `'"`)
+	log.Printf("UID of ChaosEngine %s: %s", chaosEngineName, chaosUID)
 
 	var chaosStatus string
-	projectAndNamespace := data.Project + "-" + data.Stage
 	for chaosStatus != "completed" {
 		log.Printf("Waiting for completion of chaos experiment..")
-		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", data.Service + "-chaos", "-o", "jsonpath='{.status.engineStatus}'", "-n", projectAndNamespace})
+		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", chaosEngineName, "-o", "jsonpath='{.status.engineStatus}'", "-n", projectAndNamespace})
 		if err != nil {
 			log.Printf("Error while retrieving chaos status: %s", err.Error())
 			break
@@ -100,8 +116,11 @@ func HandleDeploymentFinishedEvent(myKeptn *keptn.Keptn, incomingEvent cloudeven
 
 	log.Printf("Chaos experiment is completed")
 
+	// Construct the jsonpath filter to extract verdict of the chaosresult 
+	jsonPathFilterForResult := fmt.Sprintf("jsonpath='{.items[?(@.metadata.labels.chaosUID==\"%s\")].status.experimentstatus.verdict}'", chaosUID)
+
 	// Getting ChaosResult Data
-	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", data.Service + "-chaos-pod-delete", "-o", "jsonpath='{.status.experimentstatus.verdict}'", "-n", projectAndNamespace})
+	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", "-o", jsonPathFilterForResult, "-n", projectAndNamespace})
 	if err != nil {
 		log.Printf("Error while retrieving chaos result: %s", err.Error())
 	}
