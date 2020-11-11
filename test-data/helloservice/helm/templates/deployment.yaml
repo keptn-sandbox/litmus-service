@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloservice
+  namespace: {{ .Release.Namespace }} 
+spec:
+  selector:
+    matchLabels:
+      app: helloservice
+  template:
+    metadata:
+      labels:
+        app: helloservice
+    spec:
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: server
+        image: {{ .Values.image}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+        env:
+        - name: PORT
+          value: "9000"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 15

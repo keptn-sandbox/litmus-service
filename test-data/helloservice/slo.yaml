@@ -1,0 +1,25 @@
+---
+spec_version: "1.0"
+comparison:
+  aggregate_function: "avg"
+  compare_with: "single_result"
+  include_result_with_score: "pass"
+  number_of_comparison_results: 1
+filter:
+objectives:
+  - sli: "probe_success_percentage"
+    key_sli: false
+    pass:             # pass if value is > 99%
+      - criteria:
+          - ">=95"   
+    warning:          # if the probe success percentage is <98%, the result should be a warning
+      - criteria:
+          - ">=90"
+    weight: 1
+  - sli: "probe_duration_ms"
+    pass:
+      - criteria:
+          - "<=100"
+total_score:
+  pass: "100%"
+  warning: "75%"

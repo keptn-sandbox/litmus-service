@@ -1,11 +1,11 @@
 apiVersion: litmuschaos.io/v1alpha1
 kind: ChaosEngine
 metadata:
-  name: carts-chaos
+  name: helloservice-chaos
   namespace: litmus-chaos
 spec:
   appinfo:
-    applabel: 'app=carts'
+    applabel: 'app=helloservice'
     appkind: 'deployment'
   annotationCheck: 'false'
   engineState: 'active'
@@ -21,9 +21,12 @@ spec:
             - name: TOTAL_CHAOS_DURATION
               value: '10'
 
+            - name: RAMP_TIME
+              value: '10'
+
             # set chaos interval (in sec) as desired
             - name: CHAOS_INTERVAL
-              value: '10'
+              value: '15'
               
             # pod failures without '--force' & default terminationGracePeriodSeconds
             - name: FORCE
