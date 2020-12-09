@@ -13,7 +13,8 @@ the [LitmusChaos](https://litmuschaos.io) framework.
 | Keptn Version    | [litmus-service Docker Image](https://hub.docker.com/r/keptnsandbox/litmus-service/tags) |
 |:----------------:|:----------------------------------------:|
 |       0.7.1      | keptnsandbox/litmus-service:0.1.0 |
-|       0.7.2      | TBD |
+|       0.7.2      | keptnsandbox/litmus-service:0.1.0 |
+|       0.7.3      | keptnsandbox/litmus-service:0.1.0 |
 
 
 ## Prerequisites
