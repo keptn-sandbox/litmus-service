@@ -6,31 +6,38 @@
 # 3. configure Istio + Keptn  shttps://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#5
 # 4. connect the Keptn CLI to the cluster https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#6 
 
+## CREATE PROJECT
 keptn create project litmus --shipyard=./shipyard.yaml
 
-keptn onboard service carts-db --chart=./carts-db/ --project=litmus
+## ONBOARD SERVICE
+keptn onboard service helloservice --chart=./helloservice/helm/ --project=litmus
 
-keptn onboard service carts --chart=./carts --project=litmus
+## ADD JMETER TESTS & CONFIG
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/jmeter/load.jmx --resourceUri=jmeter/load.jmx
 
-keptn send event new-artifact --project=litmus --service=carts-db --image=docker.io/mongo --tag=4.2.2
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/jmeter/jmeter.conf.yaml --resourceUri=jmeter/jmeter.conf.yaml
 
-keptn send event new-artifact --project=litmus --service=carts --image=docker.io/keptnexamples/carts --tag=0.11.1
+## ADD QUALITY GATE
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/prometheus/sli.yaml --resourceUri=prometheus/sli.yaml
 
-keptn add-resource --project=litmus --stage=chaos --service=carts --resource=jmeter/load.jmx --resourceUri=jmeter/load.jmx
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/slo.yaml --resourceUri=slo.yaml
 
-keptn add-resource --project=litmus --stage=chaos --service=carts --resource=jmeter/jmeter.conf.yaml --resourceUri=jmeter/jmeter.conf.yaml
+## ADD LITMUS EXPERIMENT
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
+
+## ADD PROMETHEUS
 kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-service/release-0.3.5/deploy/service.yaml
 
 kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/release-0.2.2/deploy/service.yaml
 
-keptn add-resource --project=litmus --stage=chaos --service=carts --resource=prometheus/sli.yaml --resourceUri=prometheus/sli.yaml 
+keptn configure monitoring prometheus --project=litmus --service=helloservice
 
-keptn add-resource --project=litmus --stage=chaos --service=carts --resource=slo.yaml --resourceUri=slo.yaml
+## ADAPT PROMETHEUS CONFIGMAP/SCRAPE JOBS
+# TODO
 
-keptn configure monitoring prometheus --project=litmus --service=carts
 
-# Litmus PreReq Begins!! 
+### LITMUS  Begins!! 
 
 ## install litmus operator & chaos CRDs 
 
@@ -47,9 +54,11 @@ kubectl apply -f litmus/pod-delete-rbac.yaml
 # Litmus PreReq End!! 
 
 ## now we also have to add the chaos tests - ATTENTION right now this file is empty!
-keptn add-resource --project=litmus --stage=chaos --service=carts --resource=litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
+keptn add-resource --project=litmus --stage=chaos --service=carts --resource=helloservice/litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
 
-# now test with a a new-artifact event
-keptn send event new-artifact --project=litmus --service=carts --image=docker.io/keptnexamples/carts --tag=0.11.3
+## first deployment event
+keptn send event new-artifact --project=litmus --service=helloservice --image=jetzlstorfer/hello-server:v0.1.1 
 
+## second deployment event (able to scale by editing the deploy-event.json)
+keptn send event -f test-data/helloservice/deploy-event.json
