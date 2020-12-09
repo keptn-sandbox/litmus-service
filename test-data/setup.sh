@@ -33,9 +33,11 @@ kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-
 
 keptn configure monitoring prometheus --project=litmus --service=helloservice
 
-## ADAPT PROMETHEUS CONFIGMAP/SCRAPE JOBS
-# TODO
+kubectl apply -f helloservice/prometheus/blackbox-exporter.yaml
 
+kubectl apply -f helloservice/prometheus/prometheus-server-conf-cm.yaml
+
+kubectl delete pod -l app=prometheus-server -n monitoring
 
 ### LITMUS  Begins!! 
 
