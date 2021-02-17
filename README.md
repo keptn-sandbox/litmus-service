@@ -15,10 +15,10 @@ the [LitmusChaos](https://litmuschaos.io) framework.
 |       0.7.1      | keptnsandbox/litmus-service:0.1.0 |
 |       0.7.2      | keptnsandbox/litmus-service:0.1.0 |
 |       0.7.3      | keptnsandbox/litmus-service:0.1.1 |
+|       0.8.0      | keptnsandbox/litmus-service:0.2.0 |
 
 
 ## Prerequisites
-
 
 The Keptn *litmus-service* requires the following prerequisites to be setup on the Kubernetes cluster for it to run the chaos tests:  
 
@@ -111,7 +111,7 @@ kubectl -n keptn set image deployment/litmus-service litmus-service=keptnsandbox
 
 ### Configuring the Service
 
-- The service implements simple handlers for the `deployment.finished` & `test.finished` events - i.e., triggers chaos by creating the `ChaosEngine` resource, fetching info from `ChaosResult` resource & eventually deleting them, respectively. In case you would need additional functions/capabilities,  update the [eventhandlers.go](https://github.com/keptn-sandbox/litmus-service/blob/master/eventhandlers.go). For more info around how to go about this, view the **Development** section.
+- The service implements simple handlers for the `sh.keptn.event.test.triggered` & `sh.keptn.event.test.finished` events - i.e., triggers chaos by creating the `ChaosEngine` resource, fetching info from `ChaosResult` resource & eventually deleting them, respectively. In case you would need additional functions/capabilities,  update the [eventhandlers.go](https://github.com/keptn-sandbox/litmus-service/blob/master/eventhandlers.go). For more info around how to go about this, view the **Development** section.
 
 - Considering the litmus-service runs in the keptn namespace & acts on resources/applications on other namespaces (as per the project/stage names), it uses a cluster-wide RBAC. Tune the [permissions](https://github.com/keptn-sandbox/litmus-service/blob/master/deploy/service.yaml#L17) associated with this service based on functionality needed apart from CRUD on `ChaosEngine` & `ChaosResults`. 
 
@@ -186,7 +186,7 @@ Furthermore, the variable `IMAGE` needs to be configured properly in the respect
 ```yaml
 env:
   global:
-    - IMAGE=keptnsandbox/litmus-service # PLEASE CHANGE THE IMAGE NAME!!!
+    - IMAGE=keptnsandbox/litmus-service 
 ```
 You can find the implementation of the build-job in [.travis.yml](.travis.yml).
 
