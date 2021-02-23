@@ -25,11 +25,13 @@ keptn add-resource --project=litmus --stage=chaos --service=helloservice --resou
 ## ADD LITMUS EXPERIMENT
 keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
+## ADD LITMUS-SERVICE
+# kubectl apply -f ../deploy/service.yaml
 
 ## ADD PROMETHEUS
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-service/release-0.3.5/deploy/service.yaml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-service/release-0.4.0-alpha/deploy/service.yaml
 
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/release-0.2.2/deploy/service.yaml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/release-0.3.0-alpha/deploy/service.yaml
 
 keptn configure monitoring prometheus --project=litmus --service=helloservice
 
@@ -56,11 +58,12 @@ kubectl apply -f litmus/pod-delete-rbac.yaml
 # Litmus PreReq End!! 
 
 ## now we also have to add the chaos tests - ATTENTION right now this file is empty!
-keptn add-resource --project=litmus --stage=chaos --service=carts --resource=helloservice/litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
 
 ## first deployment event
-keptn send event new-artifact --project=litmus --service=helloservice --image=jetzlstorfer/hello-server:v0.1.1 
+keptn trigger delivery --project=litmus --service=helloservice --image=jetzlstorfer/hello-server:v0.1.1 
 
 ## second deployment event (able to scale by editing the deploy-event.json)
-keptn send event -f test-data/helloservice/deploy-event.json
+# ToDo: this might need some work
+# keptn send event -f test-data/helloservice/deploy-event.json

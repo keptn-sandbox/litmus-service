@@ -16,6 +16,6 @@
     }
   },
   "source": "https://github.com/keptn/keptn/cli#configuration-change",
-  "specversion": "0.2",
+  "specversion": "1.0",
   "type": "sh.keptn.event.configuration.change"
 }

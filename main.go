@@ -7,11 +7,10 @@ import (
 	"log"
 	"os"
 
-	keptn "github.com/keptn/go-utils/pkg/lib"
+	keptn "github.com/keptn/go-utils/pkg/lib/keptn"
+	keptnv2 "github.com/keptn/go-utils/pkg/lib/v0_2_0"
 
-	"github.com/cloudevents/sdk-go/pkg/cloudevents"
-	"github.com/cloudevents/sdk-go/pkg/cloudevents/client"
-	cloudeventshttp "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/http"
+	cloudevents "github.com/cloudevents/sdk-go/v2" // make sure to use v2 cloudevents here
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -29,17 +28,35 @@ type envConfig struct {
 	Env string `envconfig:"ENV" default:"local"`
 	// URL of the Keptn configuration service (this is where we can fetch files from the config repo)
 	ConfigurationServiceUrl string `envconfig:"CONFIGURATION_SERVICE" default:""`
-	// URL of the Keptn event broker (this is where this service sends cloudevents to)
-	EventBrokerUrl string `envconfig:"EVENTBROKER" default:""`
+}
+
+// ServiceName specifies the current services name (e.g., used as source when sending CloudEvents)
+const ServiceName = "litmus-service"
+
+/**
+ * Parses a Keptn Cloud Event payload (data attribute)
+ */
+func parseKeptnCloudEventPayload(event cloudevents.Event, data interface{}) error {
+	err := event.DataAs(data)
+	if err != nil {
+		log.Fatalf("Got Data Error: %s", err.Error())
+		return err
+	}
+	return nil
 }
 
 /**
  * This method gets called when a new event is received from the Keptn Event Distributor
  * Depending on the Event Type will call the specific event handler functions, e.g: handleDeploymentFinishedEvent
- * See https://github.com/keptn/spec/blob/0.1.3/cloudevents.md for details on the payload
+ * See https://github.com/keptn/spec/blob/0.2.0-alpha/cloudevents.md for details on the payload
  */
 func processKeptnCloudEvent(ctx context.Context, event cloudevents.Event) error {
-	myKeptn, err := keptn.NewKeptn(&event, keptnOptions)
+	// create keptn handler
+	log.Printf("Initializing Keptn Handler")
+	myKeptn, err := keptnv2.NewKeptn(&event, keptnOptions)
+	if err != nil {
+		return errors.New("Could not create Keptn Handler: " + err.Error())
+	}
 
 	log.Printf("gotEvent(%s): %s - %s", event.Type(), myKeptn.KeptnContext, event.Context.GetID())
 
@@ -48,88 +65,80 @@ func processKeptnCloudEvent(ctx context.Context, event cloudevents.Event) error 
 		return err
 	}
 
-	// ********************************************
-	// Lets test on each possible Event Type and call the respective handler function
-	// ********************************************
-	if event.Type() == keptn.ConfigurationChangeEventType {
-		log.Printf("Processing Configuration Change Event")
+	/**
+		* CloudEvents types in Keptn 0.8.0 follow the following pattern:
+		* - sh.keptn.event.${EVENTNAME}.triggered
+		* - sh.keptn.event.${EVENTNAME}.started
+		* - sh.keptn.event.${EVENTNAME}.status.changed
+		* - sh.keptn.event.${EVENTNAME}.finished
+		*
+		* For convenience, types can be generated using the following methods:
+		* - triggered:      keptnv2.GetTriggeredEventType(${EVENTNAME}) (e.g,. keptnv2.GetTriggeredEventType(keptnv2.DeploymentTaskName))
+		* - started:        keptnv2.GetStartedEventType(${EVENTNAME}) (e.g,. keptnv2.GetStartedEventType(keptnv2.DeploymentTaskName))
+		* - status.changed: keptnv2.GetStatusChangedEventType(${EVENTNAME}) (e.g,. keptnv2.GetStatusChangedEventType(keptnv2.DeploymentTaskName))
+		* - finished:       keptnv2.GetFinishedEventType(${EVENTNAME}) (e.g,. keptnv2.GetFinishedEventType(keptnv2.DeploymentTaskName))
+		*
+		* The following Cloud Events are reserved and specified in the Keptn spec:
+		* - approval
+		* - deployment
+		* - test
+		* - evaluation
+		* - release
+		* - remediation
+		* - action
+		* - get-sli (for quality-gate SLI providers)
+		* - problem / problem.open (both deprecated, use action or remediation instead)
+		* There are more "internal" Cloud Events that might not have all four status, e.g.:
+	    * - project
+		* - project.create
+		* - service
+		* - service.create
+		* - configure-monitoring
+		*
+		* For those Cloud Events the keptn/go-utils library conveniently provides several data structures
+		* and strings in github.com/keptn/go-utils/pkg/lib/v0_2_0, e.g.:
+		* - deployment: DeploymentTaskName, DeploymentTriggeredEventData, DeploymentStartedEventData, DeploymentFinishedEventData
+		* - test: TestTaskName, TestTriggeredEventData, TestStartedEventData, TestFinishedEventData
+		* - ... (they all follow the same pattern)
+		*
+		*
+		* In most cases you will be interested in processing .triggered events (e.g., sh.keptn.event.deployment.triggered),
+		* which you an achieve as follows:
+		* if event.type() == keptnv2.GetTriggeredEventType(keptnv2.DeploymentTaskName) { ... }
+		*
+		* Processing the event payload can be achieved as follows:
+		*
+		* eventData := &keptnv2.DeploymentTriggeredEventData{}
+		* parseKeptnCloudEventPayload(event, eventData)
+		*
+		* See https://github.com/keptn/spec/blob/0.2.0-alpha/cloudevents.md for more details of Keptn Cloud Events and their payload
+		* Also, see https://github.com/keptn-sandbox/echo-service/blob/a90207bc119c0aca18368985c7bb80dea47309e9/pkg/events.go as an example how to create your own CloudEvents
+		**/
 
-		configChangeEventData := &keptn.ConfigurationChangeEventData{}
-		err := event.DataAs(configChangeEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
+	/**
+	* The following code presents a very generic implementation of processing almost all possible
+	* Cloud Events that are retrieved by this service.
+	* Please follow the documentation provided above for more guidance on the different types.
+	* Feel free to delete parts that you don't need.
+	**/
+	switch event.Type() {
 
-		return HandleConfigurationChangeEvent(myKeptn, event, configChangeEventData)
-	} else if event.Type() == keptn.DeploymentFinishedEventType {
-		log.Printf("Processing Deployment Finished Event")
+	// -------------------------------------------------------
+	case keptnv2.GetTriggeredEventType(keptnv2.TestTaskName): // sh.keptn.event.test.triggered
+		log.Printf("Processing Test.Triggered Event")
 
-		deployFinishEventData := &keptn.DeploymentFinishedEventData{}
-		err := event.DataAs(deployFinishEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
+		eventData := &keptnv2.TestTriggeredEventData{}
+		parseKeptnCloudEventPayload(event, eventData)
 
-		return HandleDeploymentFinishedEvent(myKeptn, event, deployFinishEventData)
-	} else if event.Type() == keptn.TestsFinishedEventType {
-		log.Printf("Processing Test Finished Event")
+		return HandleTestsTriggered(myKeptn, event, eventData)
 
-		testsFinishedEventData := &keptn.TestsFinishedEventData{}
-		err := event.DataAs(testsFinishedEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
+	case keptnv2.GetFinishedEventType(keptnv2.TestTaskName): // sh.keptn.event.test.finished
+		log.Printf("Processing Test.Finished Event")
 
-		return HandleTestsFinishedEvent(myKeptn, event, testsFinishedEventData)
-	} else if event.Type() == keptn.StartEvaluationEventType {
-		log.Printf("Processing Start Evaluation Event")
+		eventData := &keptnv2.TestFinishedEventData{}
+		parseKeptnCloudEventPayload(event, eventData)
 
-		startEvaluationEventData := &keptn.StartEvaluationEventData{}
-		err := event.DataAs(startEvaluationEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
-
-		return HandleStartEvaluationEvent(myKeptn, event, startEvaluationEventData)
-	} else if event.Type() == keptn.EvaluationDoneEventType {
-		log.Printf("Processing Evaluation Done Event")
-
-		evaluationDoneEventData := &keptn.EvaluationDoneEventData{}
-		err := event.DataAs(evaluationDoneEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
-
-		return HandleEvaluationDoneEvent(myKeptn, event, evaluationDoneEventData)
-	} else if event.Type() == keptn.ProblemOpenEventType || event.Type() == keptn.ProblemEventType {
-		// Subscribing to a problem.open or problem event is deprecated since Keptn 0.7 - subscribe to sh.keptn.event.action.triggered
-		log.Printf("Subscribing to a problem.open or problem event is not recommended since Keptn 0.7. Please subscribe to event of type: sh.keptn.event.action.triggered")
-		log.Printf("Processing Problem Event")
-
-		problemEventData := &keptn.ProblemEventData{}
-		err := event.DataAs(problemEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
-
-		return HandleProblemEvent(myKeptn, event, problemEventData)
-	} else if event.Type() == keptn.ActionTriggeredEventType {
-		log.Printf("Processing Action Triggered Event")
-
-		actionTriggeredEventData := &keptn.ActionTriggeredEventData{}
-		err := event.DataAs(actionTriggeredEventData)
-		if err != nil {
-			log.Printf("Got Data Error: %s", err.Error())
-			return err
-		}
-
-		return HandleActionTriggeredEvent(myKeptn, event, actionTriggeredEventData)
+		return HandleTestFinished(myKeptn, event, eventData)
 	}
 
 	// Unknown Event -> Throw Error!
@@ -160,8 +169,6 @@ func main() {
  * Opens up a listener on localhost:port/path and passes incoming requets to gotEvent
  */
 func _main(args []string, env envConfig) int {
-	ctx := context.Background()
-
 	// configure keptn options
 	if env.Env == "local" {
 		log.Println("env=local: Running with local filesystem to fetch resources")
@@ -169,26 +176,28 @@ func _main(args []string, env envConfig) int {
 	}
 
 	keptnOptions.ConfigurationServiceURL = env.ConfigurationServiceUrl
-	keptnOptions.EventBrokerURL = env.EventBrokerUrl
-
-	// configure http server to receive cloudevents
-	t, err := cloudeventshttp.New(
-		cloudeventshttp.WithPort(env.Port),
-		cloudeventshttp.WithPath(env.Path),
-	)
 
 	log.Println("Starting litmus-service...")
 	log.Printf("    on Port = %d; Path=%s", env.Port, env.Path)
 
+	ctx := context.Background()
+	ctx = cloudevents.WithEncodingStructured(ctx)
+
+	log.Printf("Creating new http handler")
+
+	// configure http server to receive cloudevents
+	p, err := cloudevents.NewHTTP(cloudevents.WithPath(env.Path), cloudevents.WithPort(env.Port))
+
 	if err != nil {
-		log.Fatalf("failed to create transport, %v", err)
+		log.Fatalf("failed to create client, %v", err)
 	}
-	c, err := client.New(t)
+	c, err := cloudevents.NewClient(p)
 	if err != nil {
 		log.Fatalf("failed to create client, %v", err)
 	}
 
-	log.Fatalf("failed to start receiver: %s", c.StartReceiver(ctx, processKeptnCloudEvent))
+	log.Printf("Starting receiver")
+	log.Fatal(c.StartReceiver(ctx, processKeptnCloudEvent))
 
 	return 0
 }

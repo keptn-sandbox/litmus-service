@@ -35,6 +35,13 @@ kubectl apply -f ./test-data/litmus/pod-delete-ChaosExperiment-CR.yaml
 kubectl apply -f ./test-data/litmus/pod-delete-rbac.yaml 
 ```
 
+## Keptn CloudEvents
+
+This service reacts on the following Keptn CloudEvents (see [deploy/service.yaml](deploy/service.yaml)):
+* `sh.keptn.events.deployment-finished` -> start litmus chaos tests
+* `sh.keptn.events.tests-finished` -> clean up residual chaos resources
+
+
 **Notes**: 
 
 - This repo provides the example (yaml specifications) of a [pod-delete](https://docs.litmuschaos.io/docs/pod-delete/) chaos test. 
