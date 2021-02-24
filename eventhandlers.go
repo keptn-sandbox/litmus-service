@@ -41,6 +41,7 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 	if err != nil {
 		logMessage := fmt.Sprintf("No %s file found for service %s in stage %s in project %s", LitmusExperimentFileName, data.Service, data.Stage, data.Project)
 		log.Printf(logMessage)
+
 		_, err = myKeptn.SendTaskFinishedEvent(&keptnv2.EventData{
 			Status:  keptnv2.StatusErrored,
 			Result:  keptnv2.ResultFailed,
@@ -62,7 +63,16 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 	// Obtain the ChaosEngine name from the Keptn experiment manifest
 	chaosEngineName, err := ExecuteCommand("kubectl", []string{"apply", "-f", LitmusExperimentFileName, "--dry-run", "-o", "jsonpath='{.metadata.name}'"})
 	if err != nil {
-		log.Printf("Error while extracting chaosengine name from manifest: %s", err.Error())
+		logMessage := fmt.Sprintf("Error while extracting chaosengine name from manifest: %s", err.Error())
+		log.Printf(logMessage)
+
+		_, err = myKeptn.SendTaskFinishedEvent(&keptnv2.EventData{
+			Status:  keptnv2.StatusErrored,
+			Result:  keptnv2.ResultFailed,
+			Message: logMessage,
+		}, ServiceName)
+
+		return err
 	}
 	chaosEngineName = strings.Trim(chaosEngineName, `'"`)
 	log.Printf("Name of ChaosEngine: %s", chaosEngineName)
@@ -70,7 +80,16 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 	log.Printf("Executing Litmus chaos experiment...")
 	output, err := ExecuteCommand("kubectl", []string{"apply", "-f", LitmusExperimentFileName})
 	if err != nil {
-		log.Printf("Error execute kubectl apply command: %s", err.Error())
+		logMessage := fmt.Sprintf("Error execute kubectl apply command: %s", err.Error())
+		log.Printf(logMessage)
+
+		_, err = myKeptn.SendTaskFinishedEvent(&keptnv2.EventData{
+			Status:  keptnv2.StatusErrored,
+			Result:  keptnv2.ResultFailed,
+			Message: logMessage,
+		}, ServiceName)
+
+		return err
 	}
 	log.Printf("ChaosEngine create command finished with: %s", output)
 
@@ -90,8 +109,16 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 		log.Printf("Waiting for completion of chaos experiment..")
 		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", chaosEngineName, "-o", "jsonpath='{.status.engineStatus}'", "-n", projectAndNamespace})
 		if err != nil {
-			log.Printf("Error while retrieving chaos status: %s", err.Error())
-			break
+			logMessage := fmt.Sprintf("Error while retrieving chaos status: %s", err.Error())
+			log.Printf(logMessage)
+
+			_, err = myKeptn.SendTaskFinishedEvent(&keptnv2.EventData{
+				Status:  keptnv2.StatusErrored,
+				Result:  keptnv2.ResultFailed,
+				Message: logMessage,
+			}, ServiceName)
+
+			return err
 		}
 		chaosStatus = strings.Trim(chaosStatus, `'"`)
 		// interval before we check the chaosengine status again
@@ -106,7 +133,17 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 	// Getting ChaosResult Data
 	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", "-o", jsonPathFilterForResult, "-n", projectAndNamespace})
 	if err != nil {
-		log.Printf("Error while retrieving chaos result: %s", err.Error())
+		logMessage := fmt.Sprintf("Error while retrieving chaos result: %s", err.Error())
+
+		log.Printf(logMessage)
+
+		_, err = myKeptn.SendTaskFinishedEvent(&keptnv2.EventData{
+			Status:  keptnv2.StatusErrored,
+			Result:  keptnv2.ResultFailed,
+			Message: logMessage,
+		}, ServiceName)
+
+		return err
 	}
 	verdict = strings.Trim(verdict, `'"`)
 	log.Println("ChaosExperiment Verdict: " + verdict)
@@ -130,7 +167,7 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 	return err
 }
 
-// HandleTestFinished handles test.finished event
+// HandleTestFinished handles test.finished event coming from other services, such that we kill the currently running litmus experiment
 func HandleTestFinished(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Event, data *keptnv2.TestFinishedEventData) error {
 	log.Printf("Handling Tests Finished Event: %s", incomingEvent.Context.GetID())
 
