@@ -41,6 +41,9 @@ ENV ENV=production
 
 # Install extra packages
 # See https://github.com/gliderlabs/docker-alpine/issues/136#issuecomment-272703023
+ARG KUBE_VERSION=1.14.1
+RUN wget -q https://storage.googleapis.com/kubernetes-release/release/v$KUBE_VERSION/bin/linux/amd64/kubectl -O /bin/kubectl && \
+  chmod +x /bin/kubectl
 
 RUN    apk update && apk upgrade \
 	&& apk add ca-certificates libc6-compat \
