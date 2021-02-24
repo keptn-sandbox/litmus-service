@@ -4,9 +4,11 @@
     "project": "litmus",
     "service": "helloservice",
     "stage": "chaos",
-    "deployment": {
-      "image": "jetzlstorfer/hello-server:v0.1.1",
-      "replicaCount": 3
+    "configurationChange": {
+      "values": {
+        "image": "jetzlstorfer/hello-server:v0.1.1",
+        "replicaCount": 3
+      }
     }
   },
   "source": "https://github.com/keptn/keptn/cli#configuration-change",

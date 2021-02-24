@@ -7,6 +7,10 @@
 # 4. connect the Keptn CLI to the cluster https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#6 
 
 
+#####################################################################
+# make sure you are executing those commands in test-data folder!!!
+#####################################################################
+
 # 5. LITMUS Demo Setup Pre-Req 
 
 ## install litmus operator & chaos CRDs 
@@ -59,5 +63,4 @@ kubectl delete pod -l app=prometheus-server -n monitoring
 keptn trigger delivery --project=litmus --service=helloservice --image=jetzlstorfer/hello-server:v0.1.1
 
 # 11. Second deployment event: Scale hello-service (see deploy-event.json)
-# ToDo: this might need some work
-# keptn send event -f test-data/helloservice/deploy-event.json
+keptn send event -f helloservice/deploy-event.json
