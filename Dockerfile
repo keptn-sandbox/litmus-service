@@ -5,7 +5,7 @@ FROM golang:1.13.7-alpine as builder
 
 RUN apk add --no-cache gcc libc-dev git
 
-WORKDIR /src/keptn-service-template-go
+WORKDIR /src/litmus-service
 
 ARG version=develop
 ENV VERSION="${version}"
@@ -32,7 +32,7 @@ COPY . .
 
 # Build the command inside the container.
 # (You may fetch or manage dependencies here, either manually or with a tool like "godep".)
-RUN GOOS=linux go build -ldflags '-linkmode=external' $BUILDFLAGS -v -o keptn-service-template-go
+RUN GOOS=linux go build -ldflags '-linkmode=external' $BUILDFLAGS -v -o litmus-service
 
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
@@ -51,7 +51,7 @@ ARG version=develop
 ENV VERSION="${version}"
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /src/keptn-service-template-go/keptn-service-template-go /keptn-service-template-go
+COPY --from=builder /src/litmus-service/litmus-service /litmus-service
 
 EXPOSE 8080
 
