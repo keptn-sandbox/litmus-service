@@ -38,8 +38,8 @@ kubectl apply -f ./test-data/litmus/pod-delete-rbac.yaml
 ## Keptn CloudEvents
 
 This service reacts on the following Keptn CloudEvents (see [deploy/service.yaml](deploy/service.yaml)):
-* `sh.keptn.events.deployment-finished` -> start litmus chaos tests
-* `sh.keptn.events.tests-finished` -> clean up residual chaos resources
+* `sh.keptn.event.test.triggered` (used to be `sh.keptn.events.deployment-finished`) -> start litmus chaos tests
+* `sh.keptn.event.test.finished` (used to be`sh.keptn.events.tests-finished`) -> clean up residual chaos resources
 
 
 **Notes**: 
@@ -170,25 +170,22 @@ You can find the details in [.github/workflows/reviewdog.yml](.github/workflows/
 
 This repo has automated unit tests for pull requests. 
 
-You can find the details in [.github/workflows/tests.yml](.github/workflows/tests.yml).
+You can find the details in [.github/workflows/CI.yml](.github/workflows/CI.yml).
 
-### Travis-CI: Build Docker Images
+### GitHub ACtions: Build Docker Images
 
-This repo uses [Travis-CI](https://travis-ci.org) to automatically build docker images. This process is optional and needs to be manually 
-enabled by signing in into [travis-ci.org](https://travis-ci.org) using GitHub and enabling Travis for your repository.
+This repo uses GH Actions to automatically build docker images.
 
-After enabling Travis-CI, the following settings need to be added as secrets to your repository on the Travis-CI Repository Settings page:
+The following secrets need to be added on your repository secrets:
 
 * `REGISTRY_USER` - your DockerHub username
 * `REGISTRY_PASSWORD` - a DockerHub [access token](https://hub.docker.com/settings/security) (alternatively, your DockerHub password)
 
-Furthermore, the variable `IMAGE` needs to be configured properly in the respective section:
-```yaml
-env:
-  global:
-    - IMAGE=keptnsandbox/litmus-service 
+Furthermore, the variable `IMAGE` needs to be configured properly in [.ci_env](.ci_env)
+
 ```
-You can find the implementation of the build-job in [.travis.yml](.travis.yml).
+IMAGE=keptnsandbox/litmus-service 
+```
 
 ## How to release a new version of this service
 
