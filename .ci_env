@@ -1,0 +1,2 @@
+DOCKER_ORGANIZATION="keptnsandbox"
+IMAGE="litmus-service"

@@ -5,7 +5,7 @@ FROM golang:1.13.7-alpine as builder
 
 RUN apk add --no-cache gcc libc-dev git
 
-WORKDIR /src/litmus-service
+WORKDIR /src/keptn-service-template-go
 
 ARG version=develop
 ENV VERSION="${version}"
@@ -32,7 +32,7 @@ COPY . .
 
 # Build the command inside the container.
 # (You may fetch or manage dependencies here, either manually or with a tool like "godep".)
-RUN GOOS=linux go build -ldflags '-linkmode=external' $BUILDFLAGS -v -o litmus-service
+RUN GOOS=linux go build -ldflags '-linkmode=external' $BUILDFLAGS -v -o keptn-service-template-go
 
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
@@ -41,10 +41,6 @@ ENV ENV=production
 
 # Install extra packages
 # See https://github.com/gliderlabs/docker-alpine/issues/136#issuecomment-272703023
-
-ARG KUBE_VERSION=1.14.1
-RUN wget -q https://storage.googleapis.com/kubernetes-release/release/v$KUBE_VERSION/bin/linux/amd64/kubectl -O /bin/kubectl && \
-  chmod +x /bin/kubectl
 
 RUN    apk update && apk upgrade \
 	&& apk add ca-certificates libc6-compat \
@@ -55,7 +51,7 @@ ARG version=develop
 ENV VERSION="${version}"
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /src/litmus-service/litmus-service /litmus-service
+COPY --from=builder /src/keptn-service-template-go/keptn-service-template-go /keptn-service-template-go
 
 EXPOSE 8080
 
@@ -63,9 +59,9 @@ EXPOSE 8080
 ENV GOTRACEBACK=all
 
 # KEEP THE FOLLOWING LINES COMMENTED OUT!!! (they will be included within the travis-ci build)
-#travis-uncomment ADD docker/MANIFEST /
-#travis-uncomment COPY docker/entrypoint.sh /
-#travis-uncomment ENTRYPOINT ["/entrypoint.sh"]
+#build-uncomment ADD MANIFEST /
+#build-uncomment COPY entrypoint.sh /
+#build-uncomment ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the web service on container startup.
 CMD ["/litmus-service"]
