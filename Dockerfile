@@ -42,10 +42,6 @@ ENV ENV=production
 # Install extra packages
 # See https://github.com/gliderlabs/docker-alpine/issues/136#issuecomment-272703023
 
-ARG KUBE_VERSION=1.14.1
-RUN wget -q https://storage.googleapis.com/kubernetes-release/release/v$KUBE_VERSION/bin/linux/amd64/kubectl -O /bin/kubectl && \
-  chmod +x /bin/kubectl
-
 RUN    apk update && apk upgrade \
 	&& apk add ca-certificates libc6-compat \
 	&& update-ca-certificates \
@@ -63,9 +59,9 @@ EXPOSE 8080
 ENV GOTRACEBACK=all
 
 # KEEP THE FOLLOWING LINES COMMENTED OUT!!! (they will be included within the travis-ci build)
-#travis-uncomment ADD docker/MANIFEST /
-#travis-uncomment COPY docker/entrypoint.sh /
-#travis-uncomment ENTRYPOINT ["/entrypoint.sh"]
+#build-uncomment ADD MANIFEST /
+#build-uncomment COPY entrypoint.sh /
+#build-uncomment ENTRYPOINT ["/entrypoint.sh"]
 
 # Run the web service on container startup.
 CMD ["/litmus-service"]
