@@ -7,6 +7,7 @@ spec:
   selector:
     matchLabels:
       app: helloservice
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
@@ -15,7 +16,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: {{ .Values.image}}
+        image: {{ .Values.image }}
         imagePullPolicy: Always
         ports:
         - containerPort: 9000
@@ -26,6 +27,6 @@ spec:
           httpGet:
             path: /
             port: 9000
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 15
