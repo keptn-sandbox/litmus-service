@@ -107,20 +107,21 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 	var chaosStatus string
 	for chaosStatus != "completed" {
 		log.Printf("Waiting for completion of chaos experiment..")
-		chaosStatus, err = ExecuteCommand("kubectl", []string{"get", "chaosengine", chaosEngineName, "-o", "jsonpath='{.status.engineStatus}'", "-n", projectAndNamespace})
+		chaosStatus, err = CheckIfChaosIsStillRunning(chaosEngineName, projectAndNamespace)
+
 		if err != nil {
 			logMessage := fmt.Sprintf("Error while retrieving chaos status: %s", err.Error())
 			log.Printf(logMessage)
 
+			// we will consider this a WARNING (e.g., the experiment was aborted)
 			_, err = myKeptn.SendTaskFinishedEvent(&keptnv2.EventData{
-				Status:  keptnv2.StatusErrored,
-				Result:  keptnv2.ResultFailed,
+				Status:  keptnv2.StatusSucceeded,
+				Result:  keptnv2.ResultWarning,
 				Message: logMessage,
 			}, ServiceName)
 
 			return err
 		}
-		chaosStatus = strings.Trim(chaosStatus, `'"`)
 		// interval before we check the chaosengine status again
 		time.Sleep(2 * time.Second)
 	}
@@ -155,6 +156,9 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 
 	if verdict == "Pass" {
 		testResult = keptnv2.ResultPass
+	} else if verdict == "Stopped" {
+		// Not clear if it failed or if someone stopped it, so we will warn
+		testResult = keptnv2.ResultWarning
 	}
 
 	// send tests.finished
@@ -194,4 +198,17 @@ func ExecuteCommand(command string, args []string) (string, error) {
 		return string(out), fmt.Errorf("Error executing command %s %s: %s\n%s", command, strings.Join(args, " "), err.Error(), string(out))
 	}
 	return string(out), nil
+}
+
+// CheckIfChaosIsStillRunning checks if Chaos is still running in the specified namespace
+func CheckIfChaosIsStillRunning(chaosEngineName string, projectAndNamespace string) (string, error) {
+	chaosStatus, err := ExecuteCommand("kubectl", []string{"get", "chaosengine", chaosEngineName, "-o", "jsonpath='{.status.engineStatus}'", "-n", projectAndNamespace})
+
+	if err != nil {
+		return "", err
+	}
+
+	chaosStatus = strings.Trim(chaosStatus, `'"`)
+
+	return chaosStatus, nil
 }

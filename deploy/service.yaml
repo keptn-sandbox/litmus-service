@@ -62,9 +62,9 @@ spec:
             - containerPort: 8080
           env:
             - name: CONFIGURATION_SERVICE
-              value: 'http://configuration-service.keptn.svc.cluster.local:8080'
+              value: 'http://configuration-service:8080'
         - name: distributor
-          image: keptn/distributor:0.8.0-dev.202102221215
+          image: keptn/distributor:0.8.0-rc1
           livenessProbe:
             httpGet:
               path: /health

@@ -15,6 +15,10 @@
 
 ## install litmus operator & chaos CRDs 
 kubectl apply -f litmus/litmus-operator-v1.9.1.yaml
+
+# wait for operator to start
+sleep 10
+
 ## pull the chaos experiment CR (static) 
 kubectl apply -f litmus/pod-delete-ChaosExperiment-CR.yaml 
 ## pull the chaos experiment RBAC (static) 
@@ -22,8 +26,8 @@ kubectl apply -f litmus/pod-delete-rbac.yaml
 
 
 # 6. Add Prometheus and Prometheus-SLI-SErvice
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-service/release-0.4.0-alpha/deploy/service.yaml
-kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/release-0.3.0-alpha/deploy/service.yaml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-service/release-0.4.0/deploy/service.yaml
+kubectl apply -f https://raw.githubusercontent.com/keptn-contrib/prometheus-sli-service/release-0.3.0/deploy/service.yaml
 
 
 # 7. Install this service (litmus-service)

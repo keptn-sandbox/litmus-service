@@ -11,7 +11,7 @@
       }
     }
   },
-  "source": "https://github.com/keptn/keptn/cli#configuration-change",
+  "source": "Litmus-Service/test-data/setup.sh",
   "specversion": "1.0",
   "type": "sh.keptn.event.chaos.delivery.triggered"
 }
