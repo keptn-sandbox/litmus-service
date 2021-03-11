@@ -15,10 +15,10 @@ the [LitmusChaos](https://litmuschaos.io) framework.
 |       0.7.1      | keptnsandbox/litmus-service:0.1.0 |
 |       0.7.2      | keptnsandbox/litmus-service:0.1.0 |
 |       0.7.3      | keptnsandbox/litmus-service:0.1.1 |
+|       0.8.0      | keptnsandbox/litmus-service:0.2.0 (to be released soon) |
 
 
 ## Prerequisites
-
 
 The Keptn *litmus-service* requires the following prerequisites to be setup on the Kubernetes cluster for it to run the chaos tests:  
 
@@ -30,10 +30,17 @@ The Keptn *litmus-service* requires the following prerequisites to be setup on t
 Execute the following commands to setup these dependencies for a demo setup: 
 
 ```console
-kubectl apply -f ./test-data/litmus/litmus-operator-v1.8.1.yaml
+kubectl apply -f ./test-data/litmus/litmus-operator-v1.9.1.yaml
 kubectl apply -f ./test-data/litmus/pod-delete-ChaosExperiment-CR.yaml 
 kubectl apply -f ./test-data/litmus/pod-delete-rbac.yaml 
 ```
+
+## Keptn CloudEvents
+
+This service reacts on the following Keptn CloudEvents (see [deploy/service.yaml](deploy/service.yaml)):
+* `sh.keptn.event.test.triggered` (used to be `sh.keptn.events.deployment-finished`) -> start litmus chaos tests
+* `sh.keptn.event.test.finished` (used to be`sh.keptn.events.tests-finished`) -> clean up residual chaos resources
+
 
 **Notes**: 
 
@@ -104,7 +111,7 @@ kubectl -n keptn set image deployment/litmus-service litmus-service=keptnsandbox
 
 ### Configuring the Service
 
-- The service implements simple handlers for the `deployment.finished` & `test.finished` events - i.e., triggers chaos by creating the `ChaosEngine` resource, fetching info from `ChaosResult` resource & eventually deleting them, respectively. In case you would need additional functions/capabilities,  update the [eventhandlers.go](https://github.com/keptn-sandbox/litmus-service/blob/master/eventhandlers.go). For more info around how to go about this, view the **Development** section.
+- The service implements simple handlers for the `sh.keptn.event.test.triggered` & `sh.keptn.event.test.finished` events - i.e., triggers chaos by creating the `ChaosEngine` resource, fetching info from `ChaosResult` resource & eventually deleting them, respectively. In case you would need additional functions/capabilities,  update the [eventhandlers.go](https://github.com/keptn-sandbox/litmus-service/blob/master/eventhandlers.go). For more info around how to go about this, view the **Development** section.
 
 - Considering the litmus-service runs in the keptn namespace & acts on resources/applications on other namespaces (as per the project/stage names), it uses a cluster-wide RBAC. Tune the [permissions](https://github.com/keptn-sandbox/litmus-service/blob/master/deploy/service.yaml#L17) associated with this service based on functionality needed apart from CRUD on `ChaosEngine` & `ChaosResults`. 
 
@@ -163,25 +170,22 @@ You can find the details in [.github/workflows/reviewdog.yml](.github/workflows/
 
 This repo has automated unit tests for pull requests. 
 
-You can find the details in [.github/workflows/tests.yml](.github/workflows/tests.yml).
+You can find the details in [.github/workflows/CI.yml](.github/workflows/CI.yml).
 
-### Travis-CI: Build Docker Images
+### GitHub ACtions: Build Docker Images
 
-This repo uses [Travis-CI](https://travis-ci.org) to automatically build docker images. This process is optional and needs to be manually 
-enabled by signing in into [travis-ci.org](https://travis-ci.org) using GitHub and enabling Travis for your repository.
+This repo uses GH Actions to automatically build docker images.
 
-After enabling Travis-CI, the following settings need to be added as secrets to your repository on the Travis-CI Repository Settings page:
+The following secrets need to be added on your repository secrets:
 
 * `REGISTRY_USER` - your DockerHub username
 * `REGISTRY_PASSWORD` - a DockerHub [access token](https://hub.docker.com/settings/security) (alternatively, your DockerHub password)
 
-Furthermore, the variable `IMAGE` needs to be configured properly in the respective section:
-```yaml
-env:
-  global:
-    - IMAGE=keptnsandbox/litmus-service # PLEASE CHANGE THE IMAGE NAME!!!
+Furthermore, the variable `IMAGE` needs to be configured properly in [.ci_env](.ci_env)
+
 ```
-You can find the implementation of the build-job in [.travis.yml](.travis.yml).
+IMAGE=keptnsandbox/litmus-service 
+```
 
 ## How to release a new version of this service
 

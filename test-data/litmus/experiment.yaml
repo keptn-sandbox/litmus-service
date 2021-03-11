@@ -22,7 +22,7 @@ spec:
               value: '10'
 
             - name: RAMP_TIME
-              value: '10'
+              value: '30'
 
             # set chaos interval (in sec) as desired
             - name: CHAOS_INTERVAL
