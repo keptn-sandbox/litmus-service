@@ -130,6 +130,7 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 
 	// Construct the jsonpath filter to extract verdict of the chaosresult
 	jsonPathFilterForResult := fmt.Sprintf("jsonpath='{.items[?(@.metadata.labels.chaosUID==\"%s\")].status.experimentstatus.verdict}'", chaosUID)
+	log.Println("jsonPathFilterForResult: " + jsonPathFilterForResult)
 
 	// Getting ChaosResult Data
 	verdict, err := ExecuteCommand("kubectl", []string{"get", "chaosresult", "-o", jsonPathFilterForResult, "-n", projectAndNamespace})
