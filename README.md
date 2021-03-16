@@ -30,7 +30,7 @@ The Keptn *litmus-service* requires the following prerequisites to be setup on t
 Execute the following commands to setup these dependencies for a demo setup: 
 
 ```console
-kubectl apply -f ./test-data/litmus/litmus-operator-v1.9.1.yaml
+kubectl apply -f ./test-data/litmus/litmus-operator-v1.13.2.yaml
 kubectl apply -f ./test-data/litmus/pod-delete-ChaosExperiment-CR.yaml 
 kubectl apply -f ./test-data/litmus/pod-delete-rbac.yaml 
 ```
@@ -172,7 +172,7 @@ This repo has automated unit tests for pull requests.
 
 You can find the details in [.github/workflows/CI.yml](.github/workflows/CI.yml).
 
-### GitHub ACtions: Build Docker Images
+### GitHub Actions: Build Docker Images
 
 This repo uses GH Actions to automatically build docker images.
 

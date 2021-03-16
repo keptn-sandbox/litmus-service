@@ -10,7 +10,7 @@ metadata:
     name: pod-delete
     app.kubernetes.io/part-of: litmus
     app.kubernetes.io/component: chaosexperiment
-    app.kubernetes.io/version: 1.9.1
+    app.kubernetes.io/version: 1.13.2
 spec:
   definition:
     scope: Namespaced
@@ -18,6 +18,8 @@ spec:
       - apiGroups:
           - ""
           - "apps"
+          - "apps.openshift.io"
+          - "argoproj.io"
           - "batch"
           - "litmuschaos.io"
         resources:
@@ -25,6 +27,14 @@ spec:
           - "jobs"
           - "pods"
           - "pods/log"
+          - "replicationcontrollers"
+          - "deployments"
+          - "statefulsets"
+          - "daemonsets"
+          - "replicasets"
+          - "deploymentconfigs"
+          - "rollouts"
+          - "pods/exec"
           - "events"
           - "chaosengines"
           - "chaosexperiments"
@@ -37,7 +47,7 @@ spec:
           - "update"
           - "delete"
           - "deletecollection"
-    image: "litmuschaos/go-runner:1.9.1"
+    image: "litmuschaos/go-runner:1.13.2"
     imagePullPolicy: Always
     args:
     - -c
@@ -66,7 +76,7 @@ spec:
     - name: LIB
       value: 'litmus'    
 
-    - name: TARGET_POD
+    - name: TARGET_PODS
       value: ''
 
     ## it defines the sequence of chaos execution for multiple target pods
@@ -78,4 +88,4 @@ spec:
       name: pod-delete
       app.kubernetes.io/part-of: litmus
       app.kubernetes.io/component: experiment-job
-      app.kubernetes.io/version: 1.9.1
+      app.kubernetes.io/version: 1.13.2
