@@ -1,10 +1,10 @@
 
 # prerequisite: have keptn installed with --use-case=continuous-delivery flag
 
-# 1. install Istio https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#2 
-# 2. install Keptn https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#4
-# 3. configure Istio + Keptn  shttps://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#5
-# 4. connect the Keptn CLI to the cluster https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-07/index.html?index=..%2F..index#6 
+# 1. install Istio https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-08/index.html?index=..%2F..index#2 
+# 2. install Keptn https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-08/index.html?index=..%2F..index#4
+# 3. configure Istio + Keptn  shttps://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-08/index.html?index=..%2F..index#5
+# 4. connect the Keptn CLI to the cluster https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-08/index.html?index=..%2F..index#6 
 
 
 #####################################################################
@@ -14,7 +14,7 @@
 # 5. LITMUS Demo Setup Pre-Req 
 
 ## install litmus operator & chaos CRDs 
-kubectl apply -f litmus/litmus-operator-v1.9.1.yaml
+kubectl apply -f litmus/litmus-operator-v1.13.2.yaml
 
 # wait for operator to start
 sleep 10

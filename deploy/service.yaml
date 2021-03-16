@@ -56,7 +56,7 @@ spec:
       serviceAccountName: keptn-litmus-service
       containers:
         - name: litmus-service
-          image: keptnsandbox/litmus-service:0.1.2-dev-PR-22
+          image: keptnsandbox/litmus-service
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -64,7 +64,7 @@ spec:
             - name: CONFIGURATION_SERVICE
               value: 'http://configuration-service:8080'
         - name: distributor
-          image: keptn/distributor:0.8.0-rc1
+          image: keptn/distributor:0.8.0
           livenessProbe:
             httpGet:
               path: /health
