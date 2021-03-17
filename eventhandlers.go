@@ -123,7 +123,7 @@ func HandleTestsTriggered(myKeptn *keptnv2.Keptn, incomingEvent cloudevents.Even
 			return err
 		}
 		// interval before we check the chaosengine status again
-		time.Sleep(2 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 	log.Printf("Chaos experiment is completed")
