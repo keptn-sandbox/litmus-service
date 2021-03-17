@@ -57,7 +57,7 @@ keptn configure monitoring prometheus --project=litmus --service=helloservice
 
 ## Install blackbox exporter and change configuration of prometheus
 kubectl apply -f helloservice/prometheus/blackbox-exporter.yaml
-kubectl apply -f helloservice/prometheus/prometheus-server-conf-cm.yaml
+kubectl apply -f helloservice/prometheus/prometheus-server-conf-cm.yaml -n monitoring
 
 ## Restart prometheus
 kubectl delete pod -l app=prometheus-server -n monitoring
