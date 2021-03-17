@@ -182,12 +182,12 @@ data:
         target_label: kubernetes_name
         replacement: $1
         action: replace
-    - job_name: carts-litmus-chaos
+    - job_name: helloservice-litmus-chaos
       honor_timestamps: false
-      metrics_path: /prometheus
+      metrics_path: /metrics
       static_configs:
       - targets:
-        - carts.litmus-chaos:80
+        - helloservice.litmus-chaos:80
     - job_name: blackbox
       scrape_interval: 2s
       honor_timestamps: true
@@ -197,7 +197,6 @@ data:
       static_configs:
       - targets:
         - helloservice.litmus-chaos.svc.cluster.local:80
-        - carts.litmus-chaos.svc.cluster.local:80
       relabel_configs:
         - source_labels: [__address__]
           target_label: __param_target
