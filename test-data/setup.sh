@@ -1,4 +1,12 @@
 
+
+#######################################################################
+# THIS FILE IS CURRENTLY NOT MAINTAINED
+# PLEASE FOLLOW THE TUTORIAL ON HTTPS://TUTORIALS.KEPTN.SH TO USE THIS
+#######################################################################
+
+
+
 # prerequisite: have keptn installed with --use-case=continuous-delivery flag
 
 # 1. install Istio https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-08/index.html?index=..%2F..index#2 
