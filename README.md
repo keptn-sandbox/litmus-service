@@ -15,7 +15,7 @@ the [LitmusChaos](https://litmuschaos.io) framework.
 |       0.7.1      | keptnsandbox/litmus-service:0.1.0 |
 |       0.7.2      | keptnsandbox/litmus-service:0.1.0 |
 |       0.7.3      | keptnsandbox/litmus-service:0.1.1 |
-|       0.8.0      | keptnsandbox/litmus-service:0.2.0 (to be released soon) |
+|       0.8.0      | keptnsandbox/litmus-service:0.2.0 |
 
 
 ## Prerequisites

@@ -1,4 +1,12 @@
 
+
+#######################################################################
+# THIS FILE IS CURRENTLY NOT MAINTAINED
+# PLEASE FOLLOW THE TUTORIAL ON HTTPS://TUTORIALS.KEPTN.SH TO USE THIS
+#######################################################################
+
+
+
 # prerequisite: have keptn installed with --use-case=continuous-delivery flag
 
 # 1. install Istio https://tutorials.keptn.sh/tutorials/keptn-full-tour-prometheus-08/index.html?index=..%2F..index#2 
@@ -42,22 +50,22 @@ keptn create project litmus --shipyard=./shipyard.yaml
 keptn onboard service helloservice --chart=./helloservice/helm/ --project=litmus
 
 ## ADD JMETER TESTS & CONFIG
-keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/jmeter/load.jmx --resourceUri=jmeter/load.jmx
-keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/jmeter/jmeter.conf.yaml --resourceUri=jmeter/jmeter.conf.yaml
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=./jmeter/load.jmx --resourceUri=jmeter/load.jmx
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=./jmeter/jmeter.conf.yaml --resourceUri=jmeter/jmeter.conf.yaml
 
 ## ADD QUALITY GATE
-keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/prometheus/sli.yaml --resourceUri=prometheus/sli.yaml
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=./prometheus/sli.yaml --resourceUri=prometheus/sli.yaml
 keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/slo.yaml --resourceUri=slo.yaml
 
 ## ADD LITMUS EXPERIMENT
-keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=helloservice/litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
+keptn add-resource --project=litmus --stage=chaos --service=helloservice --resource=./litmus/experiment.yaml --resourceUri=litmus/experiment.yaml
 
 # 9. Configure Prometheus for this project
 keptn configure monitoring prometheus --project=litmus --service=helloservice
 
 ## Install blackbox exporter and change configuration of prometheus
-kubectl apply -f helloservice/prometheus/blackbox-exporter.yaml
-kubectl apply -f helloservice/prometheus/prometheus-server-conf-cm.yaml -n monitoring
+kubectl apply -f ./prometheus/blackbox-exporter.yaml
+kubectl apply -f ./prometheus/prometheus-server-conf-cm.yaml -n monitoring
 
 ## Restart prometheus
 kubectl delete pod -l app=prometheus-server -n monitoring
