@@ -1,6 +1,5 @@
 ---
 spec_version: '1.0'
 indicators:
-  response_time_p50: histogram_quantile(0.5, sum by(le) (rate(http_response_time_milliseconds_bucket{handler="ItemsController.addToCart",job="$SERVICE-$PROJECT-$STAGE"}[$DURATION_SECONDS])))
-  response_time_p90: histogram_quantile(0.9, sum by(le) (rate(http_response_time_milliseconds_bucket{handler="ItemsController.addToCart",job="$SERVICE-$PROJECT-$STAGE"}[$DURATION_SECONDS])))
-  response_time_p95: histogram_quantile(0.95, sum by(le) (rate(http_response_time_milliseconds_bucket{handler="ItemsController.addToCart",job="$SERVICE-$PROJECT-$STAGE"}[$DURATION_SECONDS])))
+  probe_duration_ms: avg_over_time(probe_duration_seconds{instance="$SERVICE.$PROJECT-$STAGE.svc.cluster.local:80",job="blackbox"}[$DURATION_SECONDS:1s])*1000
+  probe_success_percentage: avg_over_time(probe_success{instance="$SERVICE.$PROJECT-$STAGE.svc.cluster.local:80",job="blackbox"}[$DURATION_SECONDS:1s])*100

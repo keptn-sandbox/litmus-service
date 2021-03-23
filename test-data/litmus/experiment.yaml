@@ -1,11 +1,11 @@
 apiVersion: litmuschaos.io/v1alpha1
 kind: ChaosEngine
 metadata:
-  name: carts-chaos
+  name: helloservice-chaos
   namespace: litmus-chaos
 spec:
   appinfo:
-    applabel: 'app=carts'
+    applabel: 'app=helloservice'
     appkind: 'deployment'
   annotationCheck: 'false'
   engineState: 'active'
@@ -22,7 +22,7 @@ spec:
               value: '10'
 
             - name: RAMP_TIME
-              value: '30'
+              value: '10'
 
             # set chaos interval (in sec) as desired
             - name: CHAOS_INTERVAL
