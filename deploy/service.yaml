@@ -56,7 +56,7 @@ spec:
       serviceAccountName: keptn-litmus-service
       containers:
         - name: litmus-service
-          image: keptnsandbox/litmus-service
+          image: keptnsandbox/litmus-service:0.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
