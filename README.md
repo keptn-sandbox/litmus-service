@@ -7,6 +7,7 @@
 
 This service provides a way to perform chaos tests on your applications triggered by [Keptn](https://keptn.sh) using 
 the [LitmusChaos](https://litmuschaos.io) framework. 
+Learn more about this integration in our 2-part blog series: [part 1](https://medium.com/keptn/evaluating-kubernetes-resiliency-with-keptn-and-litmuschaos-66bdfb35cbdd?source=friends_link&sk=86b269ad3cec917ba0976328a20e914f), [part 2](https://medium.com/keptn/part-2-evaluating-application-resiliency-with-keptn-and-litmuschaos-use-case-and-demo-f43b264a2294?source=friends_link&sk=9a6810624fb5c85822c9e9484678722c).
 
 ## Compatibility Matrix
 
